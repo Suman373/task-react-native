@@ -1,69 +1,106 @@
-import { StyleSheet, ScrollView, FlatList, Text, View, Button, TextInput } from 'react-native';
+import { StyleSheet, Alert, FlatList, Text, View, Button, TextInput } from 'react-native';
 import { useEffect, useState } from 'react';
 import TaskCard from './components/TaskCard';
 
 export default function App() {
-  useEffect(() => {
-    console.log("Running app");
-  }, []);
   // const colors = ["#fafa", "#adad", "#fe8f"];
-  // states for our tasks
   const [task, setTask] = useState("");
-  // state management for tasks
   const [taskArr, setTaskArr] = useState([]);
+  const [openTaskInput, setOpenTaskInput] = useState(false);
+  const [date, setDate] = useState("");
 
-  const handleTaskInput = (textInput) => {
-    setTask(textInput);
+  const handleTaskInput = (taskInput) => {
+    setTask(taskInput);
   }
 
   const handleTaskAddition = (e) => {
     e.preventDefault();
-    setTaskArr([...taskArr, task]);
+    if (task?.trim().length === 0) {
+      Alert.alert('Invalid input', 'Empty tasks are not allowed. Check if you are entering the text in the field! ', [
+        {
+          text: 'OK',
+          onPress: () => console.log("ok pressed")
+        }
+      ]);
+      return;
+    }
+    setTaskArr([...taskArr, task.trim()]);
     setTask("");
   }
 
   const handleTaskDeletion = (deleteId) => {
     setTaskArr(
-      taskArr.filter((item,index) => index !== deleteId));
+      taskArr.filter((item, index) => index !== deleteId));
     console.log(`Item with id ${deleteId} deleted!`);
   }
+
+  useEffect(() => {
+    console.log("App running");
+    const date = new Date().toDateString();
+    setDate(date);
+  }, []);
 
   return (
     // these are the native elements to the expo rn app, it is diff for ios and android native sdks
     <View style={styles.appWrapper}>
-      <Text style={styles.appHeading}>Create your tasks</Text>
-      <View style={styles.inputWrapper}>
-        <TextInput
-          style={styles.textInput}
-          maxLength={30}
-          value={task}
-          onChangeText={handleTaskInput}
-          required
-          placeholder="Enter your task" />
-        <Button
-          onPress={handleTaskAddition}
-          style={styles.btn}
-          title="Add task" />
+      <Text style={styles.appHeading}>Taskoid'23</Text>
+      <Text style={styles.appHint}>
+        Taskoid is helping you to stay disciplined and help you with your task management
+      </Text>
+      <Text style={styles.appHint}>
+        Made with love by Suman Roy
+      </Text>
+      <View style={{marginVertical:20}}>
+      <Button
+        onPress={() => setOpenTaskInput(!openTaskInput)}
+        color="#24e3e0"
+        title={openTaskInput ? "Close" : "Add new task"} />
       </View>
+      {
+        openTaskInput ?
+          (
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.textInput}
+                maxLength={30}
+                value={task}
+                onChangeText={handleTaskInput}
+                placeholder="Enter your task" />
+              <Button
+                onPress={handleTaskAddition}
+                color="#24e3e0"
+                title="Add task" />
+            </View>
+          )
+          :
+          ""
+      }
 
-      <View style={styles.tasksWrapper}>
-        <Text style={styles.tasksHeading}>Your tasks</Text>
-        <FlatList
-          style={{ width: '100%' }}
-          data={taskArr}
-          renderItem={(itemObj, index) => {
-            return (
-              <>
-                <TaskCard
-                  // our arr element is wrapped with obj by flatlist internally
-                  handleTaskDeletion={handleTaskDeletion}
-                  key={index}
-                  itemId={itemObj.index}
-                  tsk={itemObj.item} />
-              </>
-            )
-          }} />
-      </View>
+      {
+        taskArr?.length > 0 ?
+          (
+            <View style={styles.tasksWrapper}>
+              <Text style={styles.tasksDate}>{date}</Text>
+              <FlatList
+                style={{ width: '100%' }}
+                data={taskArr}
+                renderItem={(itemObj, index) => {
+                  return (
+                    <>
+                      <TaskCard
+                        // our arr element is wrapped with obj by flatlist internally
+                        handleTaskDeletion={handleTaskDeletion}
+                        key={index}
+                        itemId={itemObj.index}
+                        tsk={itemObj.item} />
+                    </>
+                  )
+                }} />
+            </View>
+          )
+          :
+          ""
+      }
     </View>
   );
 }
@@ -77,10 +114,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#f7f7f7'
   },
   appHeading: {
-    fontSize: 24,
+    fontSize: 25,
     fontFamily: 'serif',
-    padding: 10,
+    padding: 8,
     // backgroundColor:'red',
+  },
+  appHint: {
+    fontSize: 16,
+    padding: 8,
+    margin: 4
   },
   inputWrapper: {
     flex: 1,
@@ -89,26 +131,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: 'blue',
+    borderBottomColor: 'grey',
     backgroundColor: 'white',
-    paddingHorizontal: 10,
+    margin: 6,
+    padding: 10,
     borderRadius: 8,
-  },
-  btn: {
-    padding: 10
   },
   textInput: {
     width: '70%',
-    borderWidth: 1,
-    borderColor: 'black',
-    padding: 9,
-    marginRight: 4,
+    borderWidth: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: '#24e3e0',
+    padding: 8,
     borderRadius: 8,
     color: 'black',
     fontSize: 17,
   },
   tasksWrapper: {
-    flex: 5,
+    flex: 3,
     paddingTop: 15,
     paddingHorizontal: 10,
     flexDirection: 'column',
@@ -119,8 +159,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 8,
   },
-  tasksHeading: {
-    fontSize: 20,
-    marginBottom: 12,
+  tasksDate: {
+    fontSize: 18,
+    margin: 10,
   }
 });
