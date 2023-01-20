@@ -1,8 +1,10 @@
 {
   "expo": {
-    "name": "my-app",
-    "slug": "my-app",
+    "name": "Taskoid",
+    "slug": "Taskoid",
     "version": "1.0.0",
+    "privacy":"public",
+    "description":"Task management",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
